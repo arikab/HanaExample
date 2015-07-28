@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -12,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -26,54 +28,59 @@ public class Products {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getProducts()  {
 		
-		/*JdbcTemplate jdbcTemplate;
-		List<JsonObject> templatelist = null;
+		JdbcTemplate jdbcTemplate;
+		List<JsonObject> productslist = null;
 		JsonObject resObj;
-		JsonArray templateArr;
+		JsonArray productsArr;
 		
 		DataSource ds;
 		
-		InitialContext ctx;
-		
-		if (MonsoonUtils.ds == null){
-			ctx = new InitialContext();
-			MonsoonUtils.ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
+		try {
+			InitialContext ctx = new InitialContext();
+			
+			ds = (DataSource) ctx.lookup("java:comp/env/jdbc/DefaultDB");
+
+			jdbcTemplate = new JdbcTemplate(ds);
+			productslist = jdbcTemplate.query(
+				"SELECT * FROM PRODUCTS ",
+				new RowMapper<JsonObject>() {
+
+					@Override
+					public JsonObject mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+						JsonObject templateObj = new JsonObject();
+
+						templateObj.addProperty("productId", rs.getInt("PRODUCTID"));
+						templateObj.addProperty("name", rs.getString("NAME"));
+						templateObj.addProperty("category", rs.getString("CATEGORY"));
+						templateObj.addProperty("vendor", rs.getString("VENDOR"));
+						templateObj.addProperty("price", rs.getInt("PRICE"));
+						templateObj.addProperty("quantity", rs.getInt("QUANTITY"));
+
+						return templateObj;
+					}}
+				);
+		} catch (DataAccessException | NamingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		jdbcTemplate = new JdbcTemplate(MonsoonUtils.getDataSource());
-		templatelist = jdbcTemplate.query(
-			"SELECT * FROM TBLTEMPLATE WHERE READYMADEID = ? ",
-			new Object[]{readymade},
-			new RowMapper<JsonObject>() {
 
-				@Override
-				public JsonObject mapRow(ResultSet rs, int rowNum) throws SQLException {
+		productsArr = new JsonArray();
 
-					JsonObject templateObj = new JsonObject();
-
-					templateObj.addProperty("key", rs.getInt("TEMPLATEID"));
-					templateObj.addProperty("desc", rs.getString("TEMPLATENAME"));
-
-					return templateObj;
-				}}
-			);
-
-
-		templateArr = new JsonArray();
-
-		for (JsonObject obj: templatelist){
-			templateArr.add(obj);
+		for (JsonObject obj: productslist){
+			productsArr.add(obj);
 		}
 		
 		resObj = new JsonObject();
 		
-		resObj.add("TEMPLATES", templateArr);
+		resObj.add("Products", productsArr);
 		
-		return resObj;
+		//return resObj;
 		
-		return Response.ok().entity(resObj.toString()).build();*/
+		return Response.ok().entity(resObj.toString()).build();
 		
-		return null;
+		//return null;
 	}
 	
 }

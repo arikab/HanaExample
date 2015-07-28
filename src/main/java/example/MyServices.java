@@ -10,7 +10,7 @@ public class MyServices  extends Application {
 
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> s = new HashSet<Class<?>>();
-		//s.add(MachinesData.class);
+		s.add(Products.class);
 	    return s;
 	}
 	
